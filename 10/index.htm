@@ -1,0 +1,61 @@
+<script>
+
+const input = '18,1,0,161,255,137,254,252,14,95,165,33,181,168,2,188';
+
+const at = (a, i) => i % a.length;
+
+function swap(a, i, j) {
+    let temp = a[i];
+    a[i] = a[j];
+    a[j] = temp;
+}
+
+function reverseSubsection(a, start, length) {
+    for (let i = 0, end = start + length - 1; i < Math.floor(length / 2); i++) {
+        swap(a, at(a, start + i), at(a, end - i));
+    }
+}
+
+function part1(input) {
+    const l = [...Array(256).keys()];
+    const a = input.split(',').map(parseFloat);
+    let c = 0, skip = 0;
+    for (let i = 0; i < a.length; i++) {
+        reverseSubsection(l, c, a[i]);
+        c += a[i] + skip++;
+    }
+    return l[0] * l[1];
+}
+
+console.log(`Part 1: ${part1(input)}`);
+
+function part2(input) {
+    const l = [...Array(256).keys()];
+    const a = Array(input.length).fill(0).map((v, i) => input.charCodeAt(i)).concat([17, 31, 73, 47, 23]);
+    let c = 0, skip = 0;
+    for (let j = 64; j--;) {
+        for (let i = 0; i < a.length; i++) {
+            reverseSubsection(l, c, a[i]);
+            c += a[i] + skip++;
+        }
+    }
+    const denseHash = [];
+    for (let i = 0; i < 16; i++) {
+        denseHash.push(xorBlock(l, i));
+    }
+    return denseHash.map(i => i.toString(16).padStart(2, '0')).join('');
+}
+
+function xorBlock(a, n) {
+    result = a[n * 16];
+    for (i = 1; i < 16; i++) {
+        result ^= a[n * 16 + i];
+    }
+    return result;
+}
+
+//console.log(`tests\n${part2('')}\n${part2('AoC 2017')}\n${part2('1,2,3')}\n${part2('1,2,4')}`);
+
+console.log(`Part 2: ${part2(input)}`);
+
+</script>

@@ -1,0 +1,56 @@
+<script>
+
+const input = [10, 3, 15, 10, 5, 15, 5, 15, 9, 2, 5, 8, 5, 2, 3, 6],
+    stateCache = {};
+
+function compareArrays(a, b) {
+    if (a.length != b.length) { return false; }
+    for (let i = a.length; i--;) {
+        if (a[i] !== b[i]) {
+            return false;
+        }
+    }
+    return true;
+}
+
+function cacheState(cycleCount) {
+    const s = input.join('_');
+    if (stateCache[s]) {
+        return cycleCount - stateCache[s];
+    }
+    stateCache[s] = cycleCount;
+    return 0;
+}
+
+function index(n) {
+    return n % input.length;
+}
+
+function reallocate(n, i) {
+    let k = input[n];
+    input[n] = 0;
+    for (let i = n + 1, end = i + k; i < end; i++) {
+        input[index(i)]++;
+    }
+    return cacheState(i);
+}
+
+function highestIndex() {
+    let highestValue = -Infinity,
+        highestIndex = -1;
+    for (let i = 0, length = input.length; i < length; i++) {
+        if (input[i] > highestValue) {
+            highestValue = input[i];
+            highestIndex = i;
+        }
+    }
+    return highestIndex;
+}
+
+let i = 0,
+    m = 0;
+const max = 10000000;
+while (i++ < max && (m = reallocate(highestIndex(), i)) == 0) {}
+console.log(i, m);
+
+</script>

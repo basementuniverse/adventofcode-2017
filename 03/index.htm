@@ -1,0 +1,84 @@
+<script>
+
+const input = 361527;
+
+// https://math.stackexchange.com/questions/163080/on-a-two-dimensional-grid-is-there-a-formula-i-can-use-to-spiral-coordinates-in
+function spiral(n) {
+    let k = Math.ceil((Math.sqrt(n) - 1) / 2),
+        t = 2 * k + 1,
+        m = Math.pow(t, 2);
+    t -= 1;
+    if (n >= m - t) {
+        return { x: k - (m - n), y: -k };
+    } else {
+        m = m - t;
+    }
+    if (n >= m - t) {
+        return { x: -k, y: -k + (m - n) };
+    } else {
+        m = m - t;
+    }
+    if (n >= m - t) {
+        return { x: -k + (m - n), y: k};
+    }
+    return { x: k, y: k - (m - n - t) };
+}
+
+// Part 1
+console.log("Part 1: %i", (() => {
+    let s = spiral(input);
+    return s.x + s.y;
+})());
+
+// Part 2
+const data = {},
+    hash = a => a.x + "_" + a.y,
+    add = (a, b) => ({ x: a.x + b.x, y: a.y + b.y }),
+    directions = [
+        { x: 1, y: 0 },
+        { x: 0, y: -1 },
+        { x: -1, y: 0 },
+        { x: 0, y: 1 }
+    ],
+    max = 100000;
+let position = { x: 0, y: 0 },
+    direction = directions[0],
+    i = 0,
+    v = null;
+
+function turn(d) {
+    if (d.x == 1  && d.y == 0 ) { return { x: 0,  y: -1 }; }
+    if (d.x == 0  && d.y == -1) { return { x: -1, y: 0  }; }
+    if (d.x == -1 && d.y == 0 ) { return { x: 0,  y: 1  }; }
+    if (d.x == 0  && d.y == 1 ) { return { x: 1,  y: 0  }; }
+}
+
+function sumNeighbours(p) {
+    return (
+        (data[hash({ x: p.x - 1, y: p.y - 1 })] || 0) +
+        (data[hash({ x: p.x    , y: p.y - 1 })] || 0) +
+        (data[hash({ x: p.x + 1, y: p.y - 1 })] || 0) +
+        (data[hash({ x: p.x - 1, y: p.y     })] || 0) +
+        (data[hash({ x: p.x + 1, y: p.y     })] || 0) +
+        (data[hash({ x: p.x - 1, y: p.y + 1 })] || 0) +
+        (data[hash({ x: p.x    , y: p.y + 1 })] || 0) +
+        (data[hash({ x: p.x + 1, y: p.y + 1 })] || 0)
+    );
+}
+
+data[hash(position)] = 1;
+position = add(position, direction);
+while (i++ < max) {
+    v = sumNeighbours(position);
+    data[hash(position)] = v;
+    if (v > input) {
+        console.log("Part 2: %i", v);
+        break;
+    }
+    if (!data[hash(add(position, turn(direction)))]) {
+        direction = turn(direction);
+    }
+    position = add(position, direction);
+}
+
+</script>
