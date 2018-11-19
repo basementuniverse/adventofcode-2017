@@ -1,0 +1,39 @@
+<script>
+
+/*
+Generator A starts with 116
+Generator B starts with 299
+*/
+
+const inputA = 116;
+const inputB = 299;
+
+function part1(a, b) {
+    let total = 0;
+    for (let i = 0; i < 40000000; i++) {
+        a = (a * 16807) % 2147483647;
+        b = (b * 48271) % 2147483647;
+        if ((a & 0xffff) == (b & 0xffff)) {
+            total++;
+        }
+    }
+    return total;
+}
+
+console.log(`Part 1: ${part1(inputA, inputB)}`);
+
+function part2(a, b) {
+    let total = 0;
+    for (let i = 0; i < 5000000; i++) {
+        do { a = (a * 16807) % 2147483647; } while (a & 3);
+        do { b = (b * 48271) % 2147483647; } while (b & 7);
+        if ((a & 0xffff) == (b & 0xffff)) {
+            total++;
+        }
+    }
+    return total;
+}
+
+console.log(`Part 2: ${part2(inputA, inputB)}`);
+
+</script>

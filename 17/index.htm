@@ -1,0 +1,31 @@
+<script>
+
+const input = 335;
+
+function part1(jump, limit) {
+    const buffer = [0];
+    let p = 0;
+    for (let i = 1; i <= limit; i++) {
+        p = ((p + jump) % buffer.length) + 1;
+        buffer.splice(p, 0, i);
+    }
+    return buffer[p + 1];
+}
+
+console.log(`Part 1: ${part1(input, 2017)}`);
+
+function part2(jump, limit) {
+    let p = 0;
+    let result = null;
+    for (let i = 1; i <= limit; i++) {
+        p = ((p + jump) % i) + 1;
+        if (p == 1) {
+            result = i;
+        }
+    }
+    return result;
+}
+
+console.log(`Part 2: ${part2(input, 50000000)}`);
+
+</script>

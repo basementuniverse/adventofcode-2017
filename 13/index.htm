@@ -1,0 +1,146 @@
+<textarea id="input">
+0: 3
+1: 2
+2: 4
+4: 4
+6: 5
+8: 6
+10: 6
+12: 8
+14: 6
+16: 6
+18: 9
+20: 8
+22: 8
+24: 8
+26: 12
+28: 8
+30: 12
+32: 12
+34: 12
+36: 10
+38: 14
+40: 12
+42: 10
+44: 8
+46: 12
+48: 14
+50: 12
+52: 14
+54: 14
+56: 14
+58: 12
+62: 14
+64: 12
+66: 12
+68: 14
+70: 14
+72: 14
+74: 17
+76: 14
+78: 18
+84: 14
+90: 20
+92: 14
+</textarea>
+<textarea id="test1">
+0: 3
+1: 2
+4: 4
+6: 4
+</textarea>
+<script>
+
+const input = document.querySelector('#input').value.trim().split('\n').map(a => a.split(': ').map(parseFloat));
+
+function tick(layers) {
+    for (let i = layers.length; i--;) {
+        if (!layers[i]) { continue; }
+        if (layers[i].scan == layers[i].depth - 1 || layers[i].scan == 0) {
+            layers[i].dir *= -1;
+        }
+        layers[i].scan += layers[i].dir;
+    }
+}
+
+function render(layers, packet, tickCount) {
+    console.log(`Tick: ${tickCount}`);
+    const labels = ['   '];
+    for (let i = 0, length = layers.length; i < length; i++) {
+        labels.push(i + '   ');
+    }
+    console.log(labels.join(''));
+    const maxDepth = Math.max.apply(null, layers.map(a => a.depth).filter(isFinite));
+    for (let y = 0; y < maxDepth; y++) {
+        let row = [y + ' '];
+        for (let x = 0; x < layers.length; x++) {
+            let p = y == 0 && packet == x;
+            if (!layers[x] || y >= layers[x].depth) {
+                row.push((p ? '(' : '.') + '.' + (p ? ')' : '.') + ' ');
+                continue;
+            }
+
+            row.push((p ? '(' : '[') + (layers[x].scan == y ? 'S' : ' ') + (p ? ')' : ']') + ' ');
+        }
+        console.log(row.join(''));
+    }
+}
+
+function part1(input) {
+    const layers = [];
+    let packet = -1;
+    let tickCount = -1;
+
+    // Create layers from input
+    const layerCount = Math.max.apply(null, input.map(a => a[0]).filter(isFinite));
+    for (let i = input.length; i--;) {
+        layers[input[i][0]] = {
+            depth: input[i][1],
+            scan: 0,
+            dir: -1
+        };
+    }
+
+    // Move packet across the top of each layer
+    const caught = [];
+    while (packet <= layerCount) {
+        tickCount++;
+        packet++;
+        if (layers[packet] && layers[packet].scan == 0) {
+            caught.push(packet);
+        }
+        tick(layers);
+        // render(layers, packet, tickCount);
+    }
+
+    // Calculate severity
+    let severity = 0;
+    for (let i = caught.length; i--;) {
+        severity += caught[i] * layers[caught[i]].depth;
+    }
+    return severity;
+}
+
+console.log(`Part 1: ${part1(input)}`);
+
+const caught = (tick, depth) => tick % ((depth - 1) * 2) == 0;
+
+function part2(input) {
+    const f = d => {
+        for (let i = 0, length = input.length; i < length; i++) {
+            if (caught(d + input[i][0], input[i][1])) {
+                return true;
+            }
+        }
+        return false;
+    };
+    let delay = 0;
+    while (f(delay)) {
+        delay++;
+    }
+    return delay;
+}
+
+console.log(`Part 2: ${part2(input)}`);
+
+</script>

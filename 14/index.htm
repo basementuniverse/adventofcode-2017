@@ -1,0 +1,128 @@
+<script>
+
+const input = 'vbqugkhl';
+const test1 = 'flqrgnkx';
+
+const at = (a, i) => i % a.length;
+
+function swap(a, i, j) {
+    let temp = a[i];
+    a[i] = a[j];
+    a[j] = temp;
+}
+
+function reverseSubsection(a, start, length) {
+    for (let i = 0, end = start + length - 1; i < Math.floor(length / 2); i++) {
+        swap(a, at(a, start + i), at(a, end - i));
+    }
+}
+
+function xorBlock(a, n) {
+    result = a[n * 16];
+    for (i = 1; i < 16; i++) {
+        result ^= a[n * 16 + i];
+    }
+    return result;
+}
+
+function knotHash(input) {
+    const l = [...Array(256).keys()];
+    const a = Array(input.length).fill(0).map((v, i) => input.charCodeAt(i)).concat([17, 31, 73, 47, 23]);
+    let c = 0, skip = 0;
+    for (let j = 64; j--;) {
+        for (let i = 0; i < a.length; i++) {
+            reverseSubsection(l, c, a[i]);
+            c += a[i] + skip++;
+        }
+    }
+    const denseHash = [];
+    for (let i = 0; i < 16; i++) {
+        denseHash.push(xorBlock(l, i));
+    }
+    return denseHash.map(i => i.toString(16).padStart(2, '0')).join('');
+}
+
+const hashBits = hash => hash.split('').map(a => {
+    let n = parseInt(a, 16).toString(2);
+    return '0000'.substr(n.length) + n;
+}).join('');
+const countRowBits = row => row.split('').filter(a => a == '1').length;
+const countGridBits = grid => grid.reduce((i, a) => countRowBits(a) + i, 0);
+
+function createGrid(input) {
+    const grid = [];
+    for (let i = 0; i < 128; i++) {
+        grid.push(hashBits(knotHash(input + '-' + i)));
+    }
+    return grid;
+}
+
+const grid = createGrid(input);
+console.log(`Part 1: ${countGridBits(grid)}`);
+
+function gridAt(grid, x, y) {
+    if (x < 0 || x >= 128 || y < 0 || y >= 128) {
+        return false;
+    }
+    return grid[y][x] == '1';
+}
+
+function setChar(s, p, v) {
+    return s.substr(0, p) + v + s.substr(p + 1);
+}
+
+function gridSet(grid, x, y) {
+    if (x < 0 || x >= 128 || y < 0 || y >= 128) {
+        return;
+    }
+    grid[y] = setChar(grid[y], x, '2');
+}
+
+function fillRegion(grid, x, y) {
+    gridSet(grid, x, y);
+    const q = [[x, y]];
+    let c = null;
+    while (q.length) {
+        c = q.shift();
+        if (gridAt(grid, c[0], c[1] - 1)) {
+            gridSet(grid, c[0], c[1] - 1);
+            q.push([c[0], c[1] - 1]);
+        }
+        if (gridAt(grid, c[0], c[1] + 1)) {
+            gridSet(grid, c[0], c[1] + 1);
+            q.push([c[0], c[1] + 1]);
+        }
+        if (gridAt(grid, c[0] - 1, c[1])) {
+            gridSet(grid, c[0] - 1, c[1]);
+            q.push([c[0] - 1, c[1]]);
+        }
+        if (gridAt(grid, c[0] + 1, c[1])) {
+            gridSet(grid, c[0] + 1, c[1]);
+            q.push([c[0] + 1, c[1]]);
+        }
+    }
+}
+
+function findUnfilledRegion(grid) {
+    for (let y = 0; y < 128; y++) {
+        let f = grid[y].indexOf('1');
+        if (f > -1) {
+            return [f, y];
+        }
+    }
+    return false;
+}
+
+function countRegions(grid) {
+    let total = 0;
+    let p = null;
+    while (p = findUnfilledRegion(grid)) {
+        fillRegion(grid, p[0], p[1]);
+        total++;
+    }
+    return total;
+}
+
+console.log(`Part 2: ${countRegions(grid)}`);
+
+</script>
