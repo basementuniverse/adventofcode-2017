@@ -1,0 +1,114 @@
+<textarea id="input">
+##.###.....##..#.####....
+##...#.#.#..##.#....#.#..
+...#..#.###.#.###.##.####
+..##..###....#.##.#..##.#
+###....#####..###.#..#..#
+.....#.#...#..##..#.##...
+.##.#.###.#.#...##.#.##.#
+......######.###......###
+#.....##.#....#...#......
+....#..###.#.#.####.##.#.
+.#.#.##...###.######.####
+####......#...#...#..#.#.
+###.##.##..##....#..##.#.
+..#.###.##..#...#######..
+...####.#...###..#..###.#
+..#.#.......#.####.#.....
+..##..####.######..##.###
+..#..#..##...#.####....#.
+.#..#.####.#..##..#..##..
+......#####...#.##.#....#
+###..#...#.#...#.#..#.#.#
+.#.###.#....##..######.##
+##.######.....##.#.#.#..#
+..#..##.##..#.#..###.##..
+#.##.##..##.#.###.......#
+</textarea>
+<textarea id="test-1">
+..#
+#..
+...
+</textarea>
+<script>
+
+const input = document.querySelector('#input').value.trim().split('\n').map(r => r.trim().split(''));
+const height = input.length;
+const width = input[0].length;
+const turn = (d, ccw) => { [d.x, d.y] = [d.y, d.x]; d[['x', 'y'][!!ccw + 0]] *= -1; };
+
+// Part 1
+(() => {
+    const map = {};
+    for (let y = 0; y < height; y++) {
+        for (let x = 0; x < width; x++) {
+            if (input[y][x] == '#') {
+                map[x + '_' + y] = 1;
+            }
+        }
+    }
+    const infected = (x, y) => !!map[x + '_' + y];
+
+    const pos = { x: Math.floor(width / 2), y: Math.floor(height / 2) };
+    const dir = { x: 0, y: -1 };
+    let n = 0;
+
+    for (let i = 0; i < 10000; i++) {
+        let x = infected(pos.x, pos.y);
+        turn(dir, !x);
+        if (x) {
+            map[pos.x + '_' + pos.y] = 0;
+        } else {
+            map[pos.x + '_' + pos.y] = 1;
+            n++;
+        }
+        pos.x += dir.x;
+        pos.y += dir.y;
+    }
+    console.log(`Part 1: ${n}`);
+})();
+
+// Part 2
+(() => {
+    const CLEAN = 0;
+    const WEAKENED = 1;
+    const INFECTED = 2;
+    const FLAGGED = 3;
+
+    const map = {};
+    for (let y = 0; y < height; y++) {
+        for (let x = 0; x < width; x++) {
+            if (input[y][x] == '#') {
+                map[x + '_' + y] = INFECTED;
+            }
+        }
+    }
+    const state = (x, y) => map[x + '_' + y] || 0;
+
+    const pos = { x: Math.floor(width / 2), y: Math.floor(height / 2) };
+    const dir = { x: 0, y: -1 };
+    let n = 0;
+
+    for (let i = 0; i < 10000000; i++) {
+        let x = state(pos.x, pos.y);
+        if (x == CLEAN) {
+            turn(dir, true);
+            map[pos.x + '_' + pos.y] = WEAKENED;
+        } else if (x == WEAKENED) {
+            map[pos.x + '_' + pos.y] = INFECTED;
+            n++;
+        } else if (x == INFECTED) {
+            turn(dir, false);
+            map[pos.x + '_' + pos.y] = FLAGGED;
+        } else if (x == FLAGGED) {
+            dir.x *= -1;
+            dir.y *= -1;
+            map[pos.x + '_' + pos.y] = CLEAN;
+        }
+        pos.x += dir.x;
+        pos.y += dir.y;
+    }
+    console.log(`Part 2: ${n}`);
+})();
+
+</script>
