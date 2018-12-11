@@ -1,0 +1,128 @@
+<script>
+
+const input = 12173597;
+
+const tape = {};
+let cursor = 0;
+let state = 'A';
+const write = a => tape[cursor] = a;
+const read = () => tape[cursor];
+
+function checksum() {
+    let result = 0;
+    for (let i in tape) {
+        if (!tape.hasOwnProperty(i)) { continue; }
+        if (tape[i] === 1) {
+            result++;
+        }
+    }
+    return result;
+}
+
+function runTest(diagnosticCheck) {
+    let i = diagnosticCheck;
+    while (i--) {
+        switch (state) {
+            case 'A':
+                if (!read()) {
+                    write(1);
+                    cursor++;
+                } else {
+                    write(0);
+                    cursor--;
+                }
+                state = 'B';
+                break;
+            case 'B':
+                if (!read()) {
+                    write(1);
+                    cursor--;
+                } else {
+                    write(1);
+                    cursor++;
+                }
+                state = 'A';
+                break;
+        }
+    }
+    return checksum();
+}
+
+function runLive(diagnosticCheck) {
+    let i = diagnosticCheck;
+    while (i--) {
+        switch (state) {
+            case 'A':
+                if (!read()) {
+                    write(1);
+                    cursor++;
+                    state = 'B';
+                } else {
+                    write(0);
+                    cursor--;
+                    state = 'C';
+                }
+                break;
+            case 'B':
+                if (!read()) {
+                    write(1);
+                    cursor--;
+                    state = 'A';
+                } else {
+                    write(1);
+                    cursor++;
+                    state = 'D';
+                }
+                break;
+            case 'C':
+                if (!read()) {
+                    write(1);
+                    cursor++;
+                    state = 'A';
+                } else {
+                    write(0);
+                    cursor--;
+                    state = 'E';
+                }
+                break;
+            case 'D':
+                if (!read()) {
+                    write(1);
+                    cursor++;
+                    state = 'A';
+                } else {
+                    write(0);
+                    cursor++;
+                    state = 'B';
+                }
+                break;
+            case 'E':
+                if (!read()) {
+                    write(1);
+                    cursor--;
+                    state = 'F';
+                } else {
+                    write(1);
+                    cursor--;
+                    state = 'C';
+                }
+                break;
+            case 'F':
+                if (!read()) {
+                    write(1);
+                    cursor++;
+                    state = 'D';
+                } else {
+                    write(1);
+                    cursor++;
+                    state = 'A';
+                }
+                break;
+        }
+    }
+    return checksum();
+}
+
+console.log(`Part 1: ${runLive(input)}`);
+
+</script>
